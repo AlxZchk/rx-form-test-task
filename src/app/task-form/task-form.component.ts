@@ -113,7 +113,7 @@ export class TaskFormComponent implements AfterViewInit {
     );
 
     const formData$ = combineLatest(email$, password$, passwordConfirm$).pipe(
-      tap((valResults) => { this.isButtonEnabled = valResults.every(result => result?.valid) }),
+      tap((valResults) => { this.isButtonEnabled = valResults.every(result => result.valid) }),
       filter((valResults) => valResults.every(result => result.valid)),
       map(([email, password, confirm]) =>
         `EMail: ${email.value}, Password: ${password.value}, Confirm: ${confirm.value}`)
@@ -171,7 +171,7 @@ export class TaskFormComponent implements AfterViewInit {
   }
 
   private passwordLengthValidator(password: string): ValidationResult {
-    return password?.length >= 4 ?
+    return password.length >= 4 ?
       getValidationSuccess(password) :
       getValidationFail(password, 'Password must be at least 4 characters long.')
   }
