@@ -1,0 +1,62 @@
+$test-color: #2C3E50;
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  min-width: 100vw;
+  justify-content: center;
+  align-items: center;
+}
+
+.rx-form {
+  min-width: 350px;
+  padding: 20px 30px;
+  background-color: white;
+  border-radius: 3px;
+  box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.4);
+  color: $test-color;
+  font-family: montsserat, Arial, Verdana;
+}
+
+.form-title {
+  text-align: center;
+  font-size: 15px;
+  font-weight: normal;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.input-email, .input-password, .input-password-confirm {
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.validation-error {
+  font-size: 11px;
+  height: 25px;
+  color: red;
+}
+
+.submit-button-container {
+  text-align: center;
+}
+
+.submit-button {
+  width: 100px;
+  background: #27AE60;
+  font-weight: bold;
+  color: white;
+  border: 0 none;
+  border-radius: 1px;
+  cursor: pointer;
+  padding: 10px 5px;
+
+  &[disabled] {
+    opacity: 0.5;
+  }
+}

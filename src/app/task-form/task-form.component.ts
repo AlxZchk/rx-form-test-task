@@ -6,28 +6,31 @@ import { ValidationResult } from '../interfaces/validation-result';
 @Component({
   selector: 'app-task-form',
   template: `
-    <div class="rx-form">
-      <div class="email">
-        <div class="input-container">
-          <input #emailField class="input-email" placeholder="EMail" type="email" novalidate>
+    <div class="container">
+      <form class="rx-form">
+        <h2 class="form-title">Register a new account</h2>
+        <div class="email">
+          <div class="input-container">
+            <input #emailField class="input-email" placeholder="EMail" type="email" novalidate>
+          </div>
+          <div class="validation-error">{{ emailError }}</div>
         </div>
-        <div class="validation-error">{{ emailError }}</div>
-      </div>
-      <div class="password">
-        <div class="input-container">
-          <input #passwordField class="input-password" placeholder="Password" type="password">
+        <div class="password">
+          <div class="input-container">
+            <input #passwordField class="input-password" placeholder="Password" type="password">
+          </div>
+          <div class="validation-error">{{ passwordError }}</div>
         </div>
-        <div class="validation-error">{{ passwordError }}</div>
-      </div>
-      <div class="password-confirm">
-        <div class="input-container">
-          <input #passwordConfirmField class="input-password-confirm" placeholder="Confirm password" type="password">
+        <div class="password-confirm">
+          <div class="input-container">
+            <input #passwordConfirmField class="input-password-confirm" placeholder="Confirm password" type="password">
+          </div>
+          <div class="validation-error">{{ passConfirmationError }}</div>
         </div>
-        <div class="validation-error">{{ passConfirmationError }}</div>
-      </div>
-      <div class="submit-button-container">
-        <button #submitButton class="submit-button" type="button" [disabled]='!isButtonEnabled'>Register</button>
-      </div>
+        <div class="submit-button-container">
+          <button #submitButton class="submit-button" type="button" [disabled]='!isButtonEnabled'>Register</button>
+        </div>
+      </form>
     </div>
   `,
   styleUrls: ['./task-form.component.scss']
@@ -73,7 +76,7 @@ export class TaskFormComponent implements AfterViewInit {
 
     const passwordConfirmInput$ = this.createInputStream(this.passwordConfirmFieldRef)
 
-    const passConfirmBlur$ = fromEvent(
+    const passFirstConfirmBlur$ = fromEvent(
       this.passwordConfirmFieldRef.nativeElement, 'blur'
     ).pipe(first());
 
@@ -82,14 +85,16 @@ export class TaskFormComponent implements AfterViewInit {
     *   and on password/confirm input afterwards
     */
     const passwordConfirm$ = concat(
-        passConfirmBlur$,
+        passFirstConfirmBlur$,
         merge(passwordConfirmInput$, password$)
     ).pipe(
       withLatestFrom(passwordConfirmInput$.pipe(
         startWith('')
       )),
       map(([source, confirm]) => confirm),
-      withLatestFrom(password$),
+      withLatestFrom(password$.pipe(
+        startWith('')
+      )),
       map(([confirm, password]) => this.passwordConfirmMatchValidator(confirm, password.value)),
       tap((valResult) => {
         this.passConfirmationError = valResult.errorMessage;
@@ -136,63 +141,42 @@ export class TaskFormComponent implements AfterViewInit {
   }
 
   private emailRequiredValidator(email: string): ValidationResult {
-    return email ? {
-      valid: true,
-      value: email,
-      errorMessage: null
-    } : {
-      valid: false,
-      value: email,
-      errorMessage: 'Email is required.'
-    };
+    return email ?
+      getValidationSuccess(email) :
+      getValidationFail(email, 'Email is required.')
   }
 
   private emailPatternValidator(email: string): ValidationResult {
     const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email) ? {
-      valid: true,
-      value: email,
-      errorMessage: null
-    } : {
-      valid: false,
-      value: email,
-      errorMessage: 'Email must be valid.'
-    };
+    return re.test(email) ?
+      getValidationSuccess(email) :
+      getValidationFail(email, 'Email must be valid.')
   }
 
   private passwordRequiredValidator(password: string): ValidationResult {
-    return password ? {
-      valid: true,
-      value: password,
-      errorMessage: null
-    } : {
-      valid: false,
-      value: password,
-      errorMessage: 'Password is required.'
-    };
+    return password ?
+      getValidationSuccess(password) :
+      getValidationFail(password, 'Password is required.')
   }
 
   private passwordLengthValidator(password: string): ValidationResult {
-    return password?.length >= 4 ? {
-      valid: true,
-      value: password,
-      errorMessage: null
-    } : {
-      valid: false,
-      value: password,
-      errorMessage: 'Password must be at least 4 characters long.'
-    };
+    return password?.length >= 4 ?
+      getValidationSuccess(password) :
+      getValidationFail(password, 'Password must be at least 4 characters long.')
   }
 
   private passwordConfirmMatchValidator(confirm: string, password: string): ValidationResult {
-    return confirm == password ? {
-      valid: true,
-      value: confirm,
-      errorMessage: null
-    } : {
-      valid: false,
-      value: confirm,
-      errorMessage: 'Password do not match.'
-    };
+    return confirm == password ?
+      getValidationSuccess(confirm) : getValidationFail(confirm, 'Passwords do not match.');
   }
 }
+
+function getValidationSuccess(value: string): ValidationResult {
+  return { valid: true, value, errorMessage: null}
+}
+
+function getValidationFail(value: string, errorMessage: string): ValidationResult {
+  return { valid: false, value, errorMessage };
+}
+
+
