@@ -9,8 +9,7 @@ import {
   map,
   filter,
   first,
-  startWith,
-  switchMapTo
+  startWith
 } from 'rxjs/operators';
 import { ValidationResult } from '../interfaces/validation-result';
 
