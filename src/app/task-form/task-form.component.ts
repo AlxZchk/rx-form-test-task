@@ -1,6 +1,17 @@
 import { Component, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { fromEvent, pipe, Observable, combineLatest, concat, merge } from 'rxjs';
-import { debounceTime, distinctUntilChanged, pluck, tap, withLatestFrom, map, filter, first, startWith } from 'rxjs/operators';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  pluck,
+  tap,
+  withLatestFrom,
+  map,
+  filter,
+  first,
+  startWith,
+  switchMapTo
+} from 'rxjs/operators';
 import { ValidationResult } from '../interfaces/validation-result';
 
 @Component({
@@ -93,9 +104,10 @@ export class TaskFormComponent implements AfterViewInit {
       )),
       map(([source, confirm]) => confirm),
       withLatestFrom(password$.pipe(
-        startWith('')
+        startWith(getValidationSuccess('')),
+        pluck('value')
       )),
-      map(([confirm, password]) => this.passwordConfirmMatchValidator(confirm, password.value)),
+      map(([confirm, password]) => this.passwordConfirmMatchValidator(confirm, password)),
       tap((valResult) => {
         this.passConfirmationError = valResult.errorMessage;
       })
